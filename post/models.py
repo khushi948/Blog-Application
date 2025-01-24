@@ -32,38 +32,11 @@ class m_Category(models.Model):
         return self.deleted_at is not None
 
     
-
-class t_Image(models.Model):
-    images=models.ImageField(upload_to='post/images/',default='')
-    created_at=models.DateTimeField(auto_now_add=True)
-    updated_at=models.DateTimeField(auto_now_add=True)
-    deleted_at=models.DateTimeField(null=True, blank=True)
-    def __str__(self):
-        return  f"Image {self.id}"
-    
-    objects = SoftDelete()  # Show only active records
-    all_objects = models.Manager()  # Includes both deleted and active records
-
-    def soft_delete(self):
-        #marks the timestamp when deleted
-        self.deleted_at = now()
-        self.save()
-
-    @property
-    def is_deleted(self):
-        #checks if it is deleted or not
-        return self.deleted_at is not None
-
-
-    
-
-
 class t_Post(models.Model):
     user_id=models.ForeignKey(m_User,on_delete=models.CASCADE)
     category_id=models.ForeignKey(m_Category,on_delete=models.CASCADE)
     title=models.CharField(max_length=100)
     description=models.TextField()
-    # images=models.ImageField(upload_to='post/images/',default='')
     likes=models.IntegerField(default=0)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
@@ -95,7 +68,30 @@ class t_Post(models.Model):
     #     self.password = make_password(raw_password)
 
 
-class t_Comment(models.Model):
+# class t_Images(models.Model):
+#     images=models.ImageField(upload_to='post/images/',default='')
+#     post_id=models.ForeignKey(t_Post,on_delete=models.CASCADE,default='1',related_name='images')
+#     created_at=models.DateTimeField(auto_now_add=True)
+#     updated_at=models.DateTimeField(auto_now_add=True)
+#     deleted_at=models.DateTimeField(null=True, blank=True)
+#     def __str__(self):
+#         return  f"Image {self.id}, {self.images}"
+    
+#     objects = SoftDelete()  # Show only active records
+#     all_objects = models.Manager()  # Includes both deleted and active records
+
+#     def soft_delete(self):
+#         #marks the timestamp when deleted
+#         self.deleted_at = now()
+#         self.save()
+
+#     @property
+#     def is_deleted(self):
+#         #checks if it is deleted or not
+#         return self.deleted_at is not None
+    
+
+class m_comment(models.Model):
     post_id=models.ForeignKey(t_Post,on_delete=models.CASCADE)
     user_id=models.ForeignKey(m_User,on_delete=models.CASCADE)
     message=models.TextField()
@@ -115,5 +111,7 @@ class t_Comment(models.Model):
     def is_deleted(self):
         #checks if it is deleted or not
         return self.deleted_at is not None
+
+
 
 

@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from home.views import home
+# from home.views import home_page
 from django.conf import settings
 from django.conf.urls.static import static
 from login.views import register_user,user_login,user_logout
@@ -26,9 +26,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',home), 
-    path('api/',include('login.urls')),
+    # path('',home_page,name='home'), 
+    
+    path('api_login/',include('login.urls')),
     path('api_post/',include('post.urls')),
+    path('api_images/',include('Images.urls')),
 ]
 
 

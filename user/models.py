@@ -18,7 +18,7 @@ class m_User(models.Model):
     phone_no=models.CharField(max_length=10)
     password=models.CharField(max_length=255)
     is_admin=models.BooleanField(null=True)
-    is_active = models.BooleanField(default=True)
+    is_active= models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at=models.DateTimeField(auto_now_add=now)
     updated_at=models.DateTimeField(auto_now=True) 

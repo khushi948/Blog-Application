@@ -1,0 +1,19 @@
+<!-- blog.html -->
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>All Blogs</h2>
+    
+    <ul class="blog-list">
+        {% for post in posts %}
+        <li class="blog-item">
+            <h3>{{ post.title }}</h3>
+            <p>Posted on: {{ post.created_at|date:"F d, Y" }} by {{ post.user_id }}</p>
+            <p>{{ post.description|truncatewords:30 }}</p>
+            <a href="{% url 'post_details' post.id %}">Show More</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}

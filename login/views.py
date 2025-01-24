@@ -1,5 +1,5 @@
-from datetime import timezone
-from django.shortcuts import render
+from django.utils import timezone
+from django.shortcuts import render,redirect
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 
 from user.models import m_User
+from login.forms import UserRegister
 # Create your views here.
 
 @api_view(['POST'])
@@ -85,7 +86,7 @@ def user_login(request):
     #     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def user_logout(request):
     if request.method == 'POST':
         try:
@@ -140,3 +141,35 @@ def update_user(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def user_register(request):
+    # search_fields = ['name']
+    # filter_backends = (filters.SearchFilter,)
+
+
+
+    if request.method == 'POST':
+        form = UserRegister(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            phone_no=form.cleaned_data['phone_no']
+            password = form.cleaned_data['password']
+            retype_password = form.cleaned_data['retype_password']
+            
+            
+
+# categories=m_Category.objects.all()
+#     if request.method=="GET":
+#         category_name=request.GET.get('name')
+#         if category_name:
+#             new_category = m_Category.objects.create(name=category_name)
+#             return redirect('category_list')  # Redirect to the same page to see the new category
+#     return render (request,'category_list.html',{'categories':categories})
+            
+            
+    else:
+        form = UserRegister()
+
+    return render(request, 'user_register.html', {'form': form})

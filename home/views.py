@@ -7,3 +7,7 @@ from rest_framework.response import Response
 def home(request):
     response={'status':200, 'messgae':'Hi'}
     return Response(response)
+
+
+# def home_page(request):
+#     return render(request,'home.html')

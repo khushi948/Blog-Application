@@ -1,0 +1,51 @@
+<!-- base1.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Application</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">My Blog</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Contact</a>
+        </nav>
+        <div class="header-right">
+            
+            <button type="submit">Search</button>
+          
+        </div>
+    </header>
+
+    {% block content %}
+    <section class="hero">
+        <h1>Welcome to My Blog</h1>
+    </section>
+
+    <div class="container">
+        <h2>Latest Posts</h2>
+        <div class="blog-posts">
+            {% for post in posts %}
+        <li class="blog-item">
+            <h3>{{ post.title }}</h3>
+            <p>Posted on: {{ post.created_at|date:"F d, Y" }} by {{ post.user_id }}</p>
+            <p>{{ post.description|truncatewords:30 }}</p>
+            <a href="{% url 'post_details' post.id %}">Show More</a>
+        </li>
+        {% endfor %}
+        </div>
+        <a href="{% url 'blog' %}" class="show-more">Show More</a>
+    </div>
+    {% endblock content %}
+
+    <footer>
+        &copy; 2025 My Blog. All rights reserved.
+    </footer>
+</body>
+</html>

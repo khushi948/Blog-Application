@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from post.models import m_Category
-# from post.models import t_Image
+# from post.models import t_Images
 from post.models import t_Post
-from post.models import t_Comment
+from post.models import m_comment
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,17 +14,21 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model=t_Comment
+        model=m_comment
         fields=['user_id','post_id','message']
 
 
 
 # class ImageSerializer(serializers.ModelSerializer):
+#     # image_url = serializers.ImageField(required=False)
 #     class Meta:
-#         model=t_Image
-#         fields=['id','image']
+#         model=t_Images
+#         fields=['id','images']
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model=t_Post
         fields=['user_id','category_id','title','description']
+
+class LikeSerializer(serializers.Serializer):
+    flag = serializers.BooleanField()  # Expect a boolean flag

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-yiti_gp6994cyz#$_xsryl6k-91u-n@1tfdjas&=5r7f#yqo(g
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+# CORS_ORIGIN_ALLOW_ALL=True
 
 # Application definition
 
@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'home',
     'user',
     'post',
+    'Images',
+    # 'corsheader',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -54,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'blog_application.urls'
@@ -127,8 +131,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # Development: Your static files directory
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")   # Production: Collected static files directory
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory where uploaded files are saved
