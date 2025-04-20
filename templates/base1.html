@@ -1,51 +1,65 @@
-<!-- base1.html -->
+<!-- base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Application</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>{% block title %}My Blog{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% block head %}{% endblock %}
+    <style>
+        /* Ensure body takes full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* This will allow the main content to take up available space */
+        .container {
+            flex-grow: 1;
+        }
+
+        /* Footer will stay at the bottom */
+        footer {
+            margin-top: auto; /* Push footer to the bottom */
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Header -->
     <header>
-        <div class="logo">My Blog</div>
-        <nav>
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Contact</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">My Blog</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_profile_view' %}">Profile</a>
+                    </li>
+                </ul>
+            </div>
         </nav>
-        <div class="header-right">
-            
-            <button type="submit">Search</button>
-          
-        </div>
     </header>
 
-    {% block content %}
-    <section class="hero">
-        <h1>Welcome to My Blog</h1>
-    </section>
-
+    <!-- Main Content -->
     <div class="container">
-        <h2>Latest Posts</h2>
-        <div class="blog-posts">
-            {% for post in posts %}
-        <li class="blog-item">
-            <h3>{{ post.title }}</h3>
-            <p>Posted on: {{ post.created_at|date:"F d, Y" }} by {{ post.user_id }}</p>
-            <p>{{ post.description|truncatewords:30 }}</p>
-            <a href="{% url 'post_details' post.id %}">Show More</a>
-        </li>
-        {% endfor %}
-        </div>
-        <a href="{% url 'blog' %}" class="show-more">Show More</a>
+        {% block content %}{% endblock %}
     </div>
-    {% endblock content %}
 
+    <!-- Footer -->
     <footer>
-        &copy; 2025 My Blog. All rights reserved.
+        <p>&copy; 2025 My Blog</p>
     </footer>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

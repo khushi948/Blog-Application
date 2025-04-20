@@ -19,9 +19,7 @@ from django.urls import path,include
 # from home.views import home_page
 from django.conf import settings
 from django.conf.urls.static import static
-from login.views import register_user,user_login,user_logout
-from post.views import postCategory
-
+from login import views
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -30,7 +28,8 @@ urlpatterns = [
     
     path('api_login/',include('login.urls')),
     path('api_post/',include('post.urls')),
-    path('api_images/',include('Images.urls')),
+    path('api_images/',include('images.urls')),
+    path('',include('home.urls')),
 ]
 
 

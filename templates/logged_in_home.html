@@ -1,0 +1,199 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - My Blog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left a, .nav-right a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            font-size: 1.1em;
+        }
+
+        .button {
+            background-color: #007BFF;
+            padding: 8px 16px;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .welcome-container {
+            position: relative;
+            text-align: center;
+        }
+
+        .welcome-container img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            filter: brightness(1);
+        }
+
+        .welcome-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgb(0, 0, 0);
+        }
+
+        .welcome-text h1 {
+            font-size: 3em;
+        }
+
+        .welcome-text p {
+            font-size: 1.3em;
+        }
+
+        .post-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: 1200px;
+            gap: 20px;
+        }
+
+        .post {
+            background-color: white;
+            width: 20%;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .post img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .post h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .post p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .post .show-more {
+            margin-top: auto;
+            background-color: #e74c3c;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            width: fit-content;
+        }
+
+        .post .show-more:hover {
+            background-color: #c0392b;
+        }
+
+        .show-all-posts {
+            display: block;
+            margin: 30px auto;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 200px;
+            text-decoration: none;
+        }
+
+        .show-all-posts:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="nav-left">
+            <a href="/">My Blog</a>
+        </div>
+        <div class="nav-right">
+            <a href="{% url 'logout' %}" class="button">Logout</a>
+            <a href="{% url 'user_profile_view' %}" class="button">Profile</a>
+        </div>
+    </header>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-container">
+        <img src="{% static 'images.jpg' %}" alt="Welcome Image">
+        <div class="welcome-text">
+            <h1>Welcome to My Blog {{username }}!</h1>
+            <p>Your source for exciting posts!</p>
+        </div>
+    </div>
+
+    <!-- Blog Posts -->
+    <div class="post-container">
+        {% for post in posts %}
+            <div class="post">
+                {% if post_images %}
+    <h3>Images</h3>
+    {% for image in post_images %}
+        <img src="{{ image.images.url }}" alt="Post Image" style="width:100%; max-height:400px; margin: 10px 0; border-radius: 8px;">
+    {% endfor %}
+{% else %}
+    <p>No images uploaded for this post.</p>
+{% endif %}
+                <h3>{{ post.title }}</h3>
+                <p><strong>Author:</strong> {{ post.user_id.username }}</p>
+                <p><strong>Created:</strong> {{ post.created_at|date:"Y-m-d" }}</p>
+                <p>{{ post.description|truncatewords:20 }}</p>
+                <a href="{% url 'post_detail_view' post.id %}" class="show-more">Show More</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Show All Posts -->
+    <a href="{% url 'all_posts_view' %}" class="show-all-posts">View All Posts</a>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 My Blog</p>
+    </footer>
+
+</body>
+</html>

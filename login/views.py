@@ -1,140 +1,80 @@
-from django.utils import timezone
-from django.shortcuts import render,redirect
-from rest_framework import status
-from rest_framework.response import Response
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.decorators import api_view
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
-
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from django.core.exceptions import ObjectDoesNotExist
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from user.models import m_User
-from login.forms import UserRegister
-# Create your views here.
+from .serializers import UserSerializer, RegisterSerializer
+from django.utils import timezone
 
+# Register User API
 @api_view(['POST'])
 def register_user(request):
-    if request.method=='POST':
-        serializer=UserSerializer(data=request.data)
+    if request.method == 'POST':
+        serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# User Login API with Session Management
 @api_view(['POST'])
 def user_login(request):
-    if request.method == 'POST':
-        # Debugging: Check if the incoming request data contains 'username' and 'password'
-        username = request.data.get('username', None)
-        password = request.data.get('password', None)
-        print(password)
-        # Debugging: Log the received values for username and password
-        print(f"Received username: {username}, password: {password}")
+    data = request.data
 
-        # Ensure username and password are provided
-        if not username or not password:
-            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+    if not data:
+        return Response({"error": "No data provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = None
+    username = data.get('username')
+    password = data.get('password')
+    print(password)
+    if not username or not password:
+        return Response({"error": "Username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the username is an email
-        if username and '@' in username:
-            try:
-                user = m_User.objects.get(email=username)
-            except ObjectDoesNotExist:
-                # Log if no user is found with the email
-                print(f"No user found with email: {username}")
-                pass
-
-        # If not found by email, try authenticating by username and password
-        if not user:
-            user = authenticate(username=username, password=password)
-            if user is None:
-                # Log if authentication fails
-                print(f"Authentication failed for username: {username}")
+    try:
+        user = m_User.objects.get(username=username)
         
-        # Check if user is found and authenticated
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'username':username,'token': token.key}, status=status.HTTP_200_OK)
+        if user.check_password(password):
+            login(request, user)
+            return Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid password."}, status=status.HTTP_401_UNAUTHORIZED)
+    except m_User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Log invalid credentials case
-        print(f"Invalid credentials for username: {username}")
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    # if request.method == 'POST':
-    #     username=request.data.get('username')
-    #     password=request.data.get('password')
-
-    #     user = None
-    #     if '@' in username:
-    #         try:
-    #             user=m_User.objects.get(email=username)
-    #         except ObjectDoesNotExist:
-    #             pass
-
-    #     if not user:
-    #         user = authenticate(username=username, password=password)
-
-    #     if user:
-    #         token, _ = Token.objects.get_or_create(user=user)
-    #         return Response({'token': token.key}, status=status.HTTP_200_OK)
-
-    #     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
+# User Logout API (clear session)
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
 def user_logout(request):
     if request.method == 'POST':
-        try:
-            # Delete the user's token to logout
-            request.user.auth_token.delete()
-            return Response({'message': 'Successfully logged out.'}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logout(request)  # This will clear the session
+        return Response({'message': 'Successfully logged out.'}, status=status.HTTP_200_OK)
 
-@api_view(['GET'])
-def get_user_details(request, pk):
-    try:
-        # Fetch the user that has not been soft-deleted
-        user = m_User.objects.get(pk=pk, deleted_at__isnull=True)
-    except m_User.DoesNotExist:
-        return Response({'detail': 'user not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-    # Serialize the user object and return the data
-    serializer = UserSerializer(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-
+# Soft Delete User API (mark user as deleted)
 @api_view(['DELETE'])
 def delete_user(request, pk):
     try:
-        # Fetch the user that has not been soft deleted
         user = m_User.objects.get(pk=pk, deleted_at__isnull=True)
     except m_User.DoesNotExist:
         return Response({'detail': 'user not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Soft delete the user by setting deleted_at timestamp
+    # Soft delete by setting deleted_at timestamp
     user.deleted_at = timezone.now()
     user.save()
-    return Response({'detail': 'user marked as deleted successfully.'}, status=status.HTTP_200_OK)
+    return Response({'detail': 'User marked as deleted successfully.'}, status=status.HTTP_200_OK)
 
+# Update User Details API (with partial update functionality)
 @api_view(['PUT', 'PATCH'])
 def update_user(request, pk):
     try:
-        # Fetch the user that has not been soft deleted
         user = m_User.objects.get(pk=pk, deleted_at__isnull=True)
     except m_User.DoesNotExist:
         return Response({'detail': 'user not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
-        # Full update: Replace the entire user resource
         serializer = UserSerializer(user, data=request.data)
     elif request.method == 'PATCH':
-        # Partial update: Update only the provided fields
         serializer = UserSerializer(user, data=request.data, partial=True)
 
     if serializer.is_valid():
@@ -142,34 +82,77 @@ def update_user(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
-def user_register(request):
-    # search_fields = ['name']
-    # filter_backends = (filters.SearchFilter,)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request, pk):
+    try:
+        user = m_User.objects.get(pk=pk, deleted_at__isnull=True)
+    except m_User.DoesNotExist:
+        return Response({'detail': 'user not found.'}, status=status.HTTP_404_NOT_FOUND)
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        
+        # Call the API view to authenticate user (you can also call the API in the frontend)
+        response = user_login(request)
+        if response.status_code == 200:
+            # If the response is successful, login the user
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect('home')  # Redirect to homepage or dashboard after login
+            else:
+                return render(request, 'login.html', {'error': 'Invalid credentials.'})
+        else:
+            # If API login fails, render the login page with the error message
+            error_message = response.data.get('error', 'Invalid credentials.')
+            return render(request, 'login.html', {'error': error_message})
+    
+    return render(request, 'login.html')  # Just render the login page for GET request
 
 
+from django.shortcuts import render, redirect
+def register_view(request):
+    if request.method == "POST":
+        data = {
+            'username': request.POST['username'],
+            'email': request.POST['email'],
+            'password': request.POST['password'],
+            'phone_no': request.POST['phone_no']
+        }
+        
+        # Call the register API
+        response = register_user(request)
+        if response.status_code == 201:
+            # Redirect to login after successful registration
+            return redirect('login')
+        else:
+            # If registration fails, render the register page with the error message
+            error_message = response.data.get('error', 'Something went wrong')
+            return render(request, 'register.html', {'error': error_message})
+    
+    return render(request, 'register.html')  # Just render the register page for GET request
+def user_logout_view(request):
+    # Log the user out and redirect to the login page
+    logout(request)
+    return redirect('login')  # Redirect to login page after logout
 
-    if request.method == 'POST':
-        form = UserRegister(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            email = form.cleaned_data['email']
-            phone_no=form.cleaned_data['phone_no']
-            password = form.cleaned_data['password']
-            retype_password = form.cleaned_data['retype_password']
-            
-            
-
-# categories=m_Category.objects.all()
-#     if request.method=="GET":
-#         category_name=request.GET.get('name')
-#         if category_name:
-#             new_category = m_Category.objects.create(name=category_name)
-#             return redirect('category_list')  # Redirect to the same page to see the new category
-#     return render (request,'category_list.html',{'categories':categories})
-            
-            
-    else:
-        form = UserRegister()
-
-    return render(request, 'user_register.html', {'form': form})
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])  # Ensure only authenticated users can access this view
+# def protected_view(request):
+#     return Response({"message": "You have access to this view."})

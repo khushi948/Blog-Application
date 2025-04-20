@@ -3,24 +3,21 @@ from django.urls import path
 from home.views import home
 from django.conf import settings
 from django.conf.urls.static import static
-from login.views import register_user,user_login,user_logout,user_register
 from django.shortcuts import HttpResponse
-from login.views import get_user_details,update_user,delete_user
+from login import views
+
 
 urlpatterns = [
-    path('register', register_user, name='register'),
-    path('login', user_login, name='login'),
-    path('logout', user_logout, name='logout'),
 
-    # path('create_user/', create_user, name='create_user'),
-    path('delete_user/<int:pk>', delete_user, name='delete_user'),
-    path('update_user/<int:pk>', update_user, name='update_user'),
-    path('get_user_details/<int:pk>', get_user_details, name='get_user_details'),
-    
-    path('user_register/',user_register,name='user_register'),
-
-    # path('', lambda request: HttpResponse('Thank you!'), name='thanks'),
-    # path('user_register/login_error', lambda request: HttpResponse('Error:could not register'), name='error'),
+    path('api_login/logout', views.user_logout, name='user_logout'),
+    path('delete_user/<int:pk>', views.delete_user, name='delete_user'),
+    path('update_user/<int:pk>', views.update_user, name='update_user'),
+    path('get_user_details/<int:pk>', views.get_user_details, name='get_user_details'),
    
-]
+    path('login/', views.login_view, name='login'), 
+    path('register/', views.register_view, name='register'),  
+     path('logout/', views.user_logout_view, name='logout'),  
+    path('api_login/login/', views.user_login, name='api_login'), 
+    path('api_login/register/', views.register_user, name='api_register'), 
 
+]

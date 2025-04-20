@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'home',
     'user',
     'post',
-    'Images',
+    'images',
     # 'corsheader',
 ]
 
